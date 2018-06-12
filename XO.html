@@ -1,0 +1,256 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <title>Page Title</title>
+    <style>
+        button{
+            background-color:gray;
+            width: 100px;
+            text-align: center;
+            color: black;
+            font-size: 30px;
+            height: 100px;
+        }
+        progress{
+            size: 50px;
+        }
+    </style>
+    <script>
+        var player='X';
+        var GameHistory=[[-1,-1],[-1,-1],[-1,-1],[-1,-1],[-1,-1],[-1,-1],[-1,-1],[-1,-1],[-1,-1]];
+        var GHI=0;
+        var GameArray=[[0,0,0],[0,0,0],[0,0,0]];
+        var GameDone=0;
+        var t=10;
+        var inf;
+        function timer(){
+            var pd=document.getElementById("PD");
+            pd.style.display="table";
+            t--;
+            pd.value=10-t;
+            if(t<=0){
+                document.location.reload();
+            }
+        }
+        function changeButtonColor(i,j){
+            var id=i*3+j+1;
+            var btn=document.getElementById(id);
+            btn.style.backgroundColor="#FFFFFF";
+            btn.style.color="#000000";
+            return;
+        }
+        function winner(i){
+            inf=document.getElementById("info");
+            inf.innerHTML="Player "+player+" Win's";
+            console.log("WINNER IS:",player, "From:",i);
+            var d=setInterval(timer,1000);
+        }
+        function gv(i,j){
+           return GameArray[i][j];
+        }
+        function checkDiagonals(){
+            if(gv(0,0)==gv(1,1)&&gv(1,1)==gv(2,2)&&gv(0,0)!=0){
+                changeButtonColor(0,0);
+                changeButtonColor(1,1);
+                changeButtonColor(2,2);
+                return 1;
+            }
+            if(gv(0,2)==gv(1,1)&&gv(1,1)==gv(2,0)&&gv(0,2)!=0){
+                changeButtonColor(0,2);
+                changeButtonColor(1,1);
+                changeButtonColor(2,0);
+                return 1;
+            }
+            return -1;
+        }
+        function checkRows(){
+            var i=0;
+            var j=0;
+            
+            var win=0;
+            for(i=0;i<3;i++){
+                for(j=0;j<2;j++){
+                   if(gv(i,j)!=gv(i,j+1)){
+                        break;
+                   }
+                }
+                if(j==2&&gv(i,j)!=0){
+                    changeButtonColor(i,0);
+                    changeButtonColor(i,1);
+                    changeButtonColor(i,2);
+                    return 1;
+                }
+            }
+            return -1;
+        }
+        function checkColumns(){
+            var i=0;
+            var j=0;
+            var win=0;
+            for(i=0;i<3;i++){
+                for(j=0;j<2;j++){
+                   if(gv(j,i)!=gv(j+1,i)){
+                        break;
+                   }
+                }
+                if(j==2&&gv(j,i)!=0){
+                    changeButtonColor(0,i);
+                    changeButtonColor(1,i);
+                    changeButtonColor(2,i);
+                    return 1;
+                }
+            }
+            return -1;
+        }
+        function checkGame(){
+            var i=0;
+            var j=0;
+            GameDone=checkDiagonals();
+            if(GameDone==1){
+               winner(1);
+            }
+            else{
+                GameDone=checkRows();
+                if(GameDone==1){
+                    winner(2);
+                }
+                else{
+                    GameDone=checkColumns();
+                    if(GameDone==1){
+                        winner(3);
+                    }
+                }
+            
+            }
+        }
+        function backTrack(){
+            if(GHI==0){
+                alert("Not Possible Move!");
+                return;
+            }
+            var i=GameHistory[GHI-1][0];
+            var j=GameHistory[GHI-1][1];
+            var id=i*3+j+1;
+            GHI=GHI-1;
+            var btn=document.getElementById(id);
+            GameArray[i][j]=0;
+            btn.innerHTML="";
+            inf=document.getElementById("info");
+            btn.style.backgroundColor="gray";
+            if(player=='X'){
+                player='Y';
+                if(GameDone!=1){
+                    inf.innerHTML="Player Y";
+                }
+                return;
+            }
+            else{
+                player='X';
+                if(GameDone!=1){
+                    inf.innerHTML="Player X";
+                }
+                return;
+            }
+        }
+        function fastTrack(){
+            if(GHI==9){
+                alert("Not Possible Move!");
+                return;
+            }
+            var i=GameHistory[GHI+1][0];
+            var j=GameHistory[GHI+1][1];
+            if(i==-1||j==-1){
+                alert("Not Possible Move!");
+                return;
+            }
+            inf=document.getElementById("info");
+            var id=i*3+j+1;
+            GHI=GHI-1;
+            var btn=document.getElementById(id);
+            GameArray[i][j]=0;
+            btn.innerHTML=player;
+            btn.style.color="#FFFFFF";
+            btn.style.backgroundColor="#000000";
+            if(player=='X'){
+                player='Y';
+                if(GameDone!=1){
+                    inf.innerHTML="Player Y";
+                    return;
+                }
+            }
+            else{
+                player='X';
+                if(GameDone!=1){
+                    inf.innerHTML="Player X";
+                }
+                return;
+            }
+        }
+        function playMove(id,i,j){
+            if(GameArray[i][j]==0){
+                GameArray[i][j]=player;
+                GameHistory[GHI][0]=i;
+                GameHistory[GHI][1]=j;
+                GHI=GHI+1;
+                var btn=document.getElementById(id);
+                inf=document.getElementById("info");
+                btn.innerHTML=player;
+                btn.style.backgroundColor="#000000";
+                btn.style.color="#FFFFFF";
+                if(player=='X'){
+                    checkGame();
+                    player='Y';
+                    if(GameDone!=1){
+                    inf.innerHTML="Player Y";
+                    }
+                    return;
+                }
+                else{
+                    checkGame();
+                    player='X';
+                    if(GameDone!=1){
+                    inf.innerHTML="Player X";
+                    }
+                    return;
+                }
+            }
+            else{
+                alert("Not Possible Move!");
+                return;
+            }
+        }
+    </script>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+</head>
+<body>
+    <center>
+        <h1 id="info">Player X</h1>
+        <table>
+            <tr>
+                <td><button id="1" onclick="playMove(1,0,0)"></button></td>
+                <td><button id="2" onclick="playMove(2,0,1)"></button></td>
+                <td><button id="3" onclick="playMove(3,0,2)"></button></td>
+            </tr>
+            <tr>
+                <td><button id="4" onclick="playMove(4,1,0)"></button></td>
+                <td><button id="5" onclick="playMove(5,1,1)"></button></td>
+                <td><button id="6" onclick="playMove(6,1,2)"></button></td>
+            </tr>
+            <tr>
+                <td><button id="7" onclick="playMove(7,2,0)"></button></td>
+                <td><button id="8" onclick="playMove(8,2,1)"></button></td>
+                <td><button id="9" onclick="playMove(9,2,2)"></button></td>
+            </tr>
+            <tr>
+                <td></td>
+                <td><button onclick="backTrack()">Back</button></td>
+                <td></td>
+                
+            </tr>
+        </table>
+        <progress style="display: none;" value="0" max=10 id="PD"></progress>
+    </center>
+</body>
+</html>
